@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Validate required fields
-    if (!body.email || !body.anxietyLevel || !body.biggestChallenge) {
+    if (!body.email || !body.frequency || !body.goal) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -21,12 +21,15 @@ export async function POST(request: NextRequest) {
     const result = await collection.insertOne({
       name: body.name || 'Anonymous',
       email: body.email,
-      anxietyLevel: body.anxietyLevel,
-      socialSituations: body.socialSituations || [],
-      currentCoping: body.currentCoping,
-      desiredFeatures: body.desiredFeatures,
-      biggestChallenge: body.biggestChallenge,
-      generalFeedback: body.generalFeedback || '',
+      frequency: body.frequency,
+      triggers: body.triggers || [],
+      symptoms: body.symptoms,
+      preparation: body.preparation,
+      goal: body.goal,
+      setting: body.setting,
+      scriptType: body.scriptType,
+      format: body.format,
+      mustHave: body.mustHave,
       timestamp: body.timestamp || new Date().toISOString(),
       userAgent: body.userAgent || request.headers.get('user-agent'),
       pageUrl: body.pageUrl || '',

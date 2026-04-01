@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageCircle, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, MessageCircle, Star, ChevronLeft, ChevronRight, CheckCircle, Shield, Zap, Heart, Smartphone, Users, Briefcase } from 'lucide-react';
 
 interface SurveyPopupProps {
   isOpen: boolean;
@@ -11,47 +11,43 @@ interface SurveyPopupProps {
 
 export default function SurveyPopup({ isOpen, onClose }: SurveyPopupProps) {
   const [formData, setFormData] = useState({
-    name: '',
+    frequency: '',
+    triggers: [] as string[],
+    symptoms: '',
+    preparation: '',
+    goal: '',
+    setting: '',
+    scriptType: '',
+    format: '',
+    mustHave: '',
     email: '',
-    anxietyLevel: '',
-    socialSituations: [] as string[],
-    currentCoping: '',
-    desiredFeatures: '',
-    biggestChallenge: '',
-    generalFeedback: ''
+    name: ''
   });
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const socialSituationOptions = [
-    'Job interviews',
-    'Work meetings',
-    'Dating/social events',
-    'Phone calls',
-    'Public speaking',
-    'Small talk with strangers',
-    'Group conversations',
-    'Networking events'
-  ];
-
-  const anxietyLevelOptions = [
-    'Mild - occasional discomfort',
-    'Moderate - often avoid situations',
-    'Severe - significant life impact',
-    'Debilitating - prevents daily activities'
-  ];
-
-  const copingStrategyOptions = [
-    'Avoidance - I just avoid social situations',
-    'Preparation - I rehearse conversations beforehand',
-    'Breathing exercises',
-    'Therapy/counseling',
-    'Medication',
-    'No strategies - I struggle through it',
-    'Other apps/tools'
-  ];
+  const options = {
+    frequency: ['Daily', 'Weekly', 'Monthly', 'Rarely'],
+    triggers: [
+      'Job interviews',
+      'Work meetings',
+      'Dating/social events',
+      'Phone calls',
+      'Public speaking',
+      'Small talk with strangers',
+      'Group conversations',
+      'Networking events'
+    ],
+    symptoms: ['Racing heart', 'Mental blanking', 'Sweating', 'Trembling', 'Nausea', 'Shortness of breath'],
+    preparation: ['Hours', 'Minutes', 'A few seconds', 'Not at all'],
+    goal: ['Build confidence', 'Graceful exits', 'Better networking', 'Dating success', 'Daily comfort'],
+    setting: ['In-person', 'Online meetings', 'Texting', 'Phone calls'],
+    scriptType: ['Professional/Work', 'Casual/Friends', 'Emergency/Panic', 'Deep/Vulnerable'],
+    format: ['Short one-liners', 'Full conversation flows', 'Bullet points', 'AI-generated dynamic'],
+    mustHave: ['AI Generation', 'Voice mode', 'Offline access', 'Practice mode', 'Real-time prompts']
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -72,19 +68,27 @@ export default function SurveyPopup({ isOpen, onClose }: SurveyPopupProps) {
     }));
   };
 
+  const handleSelectOption = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    if (currentStep < 10 && field !== 'triggers') {
+      setTimeout(() => nextStep(), 300);
+    }
+  };
+
   const handleCheckboxChange = (situation: string) => {
     setFormData(prev => ({
       ...prev,
-      socialSituations: prev.socialSituations.includes(situation)
-        ? prev.socialSituations.filter(s => s !== situation)
-        : [...prev.socialSituations, situation]
+      triggers: prev.triggers.includes(situation)
+        ? prev.triggers.filter(s => s !== situation)
+        : [...prev.triggers, situation]
     }));
   };
 
-
-
   const nextStep = () => {
-    if (currentStep < 6) {
+    if (currentStep < 10) {
       setCurrentStep(prev => prev + 1);
     }
   };
@@ -119,14 +123,17 @@ export default function SurveyPopup({ isOpen, onClose }: SurveyPopupProps) {
           onClose();
           setSubmitStatus('idle');
           setFormData({
-            name: '',
+            frequency: '',
+            triggers: [],
+            symptoms: '',
+            preparation: '',
+            goal: '',
+            setting: '',
+            scriptType: '',
+            format: '',
+            mustHave: '',
             email: '',
-            anxietyLevel: '',
-            socialSituations: [],
-            currentCoping: '',
-            desiredFeatures: '',
-            biggestChallenge: '',
-            generalFeedback: ''
+            name: ''
           });
           setCurrentStep(1);
         }, 2000);
@@ -142,171 +149,156 @@ export default function SurveyPopup({ isOpen, onClose }: SurveyPopupProps) {
   };
 
   const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Tell us about your social anxiety journey</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                We want to understand your experience better to make Promptly more helpful for you.
-              </p>
-            </div>
+    const stepConfigs = [
+      {
+        id: 1,
+        title: "How often do you feel 'frozen' or anxious in social situations?",
+        field: 'frequency',
+        type: 'select'
+      },
+      {
+        id: 2,
+        title: "Which situations do you find most challenging?",
+        field: 'triggers',
+        type: 'multi'
+      },
+      {
+        id: 3,
+        title: "What is your primary physical symptom during anxiety?",
+        field: 'symptoms',
+        type: 'select'
+      },
+      {
+        id: 4,
+        title: "How much time do you spend 'rehearsing' conversations?",
+        field: 'preparation',
+        type: 'select'
+      },
+      {
+        id: 5,
+        title: "What is your primary goal for using social scripts?",
+        field: 'goal',
+        type: 'select'
+      },
+      {
+        id: 6,
+        title: "Where would you use Promptly most often?",
+        field: 'setting',
+        type: 'select'
+      },
+      {
+        id: 7,
+        title: "Which script category interests you most?",
+        field: 'scriptType',
+        type: 'select'
+      },
+      {
+        id: 8,
+        title: "What is your preferred script format?",
+        field: 'format',
+        type: 'select'
+      },
+      {
+        id: 9,
+        title: "What single feature would make this app a must-have?",
+        field: 'mustHave',
+        type: 'select'
+      },
+      {
+        id: 10,
+        title: "Ready for early access? Enter your details.",
+        field: 'contact',
+        type: 'final'
+      }
+    ];
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                What's your biggest social challenge right now?*
-              </label>
-              <textarea
-                name="biggestChallenge"
-                value={formData.biggestChallenge}
-                onChange={handleInputChange}
-                rows={3}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="e.g., job interviews, making small talk, dating..."
-              />
-              <p className="text-xs text-gray-500 mt-1">Quick suggestions: job interviews, small talk, dating, phone calls, meetings</p>
-            </div>
-          </div>
-        );
+    const config = stepConfigs[currentStep - 1];
 
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Which social situations are most challenging?</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {socialSituationOptions.map((situation) => (
-                  <label key={situation} className="flex items-center space-x-2 p-2 bg-purple-50 rounded-lg">
-                    <input
-                      type="checkbox"
-                      checked={formData.socialSituations.includes(situation)}
-                      onChange={() => handleCheckboxChange(situation)}
-                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <span className="text-sm text-gray-700">{situation}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                How would you describe your anxiety level?*
-              </label>
-              <select
-                name="anxietyLevel"
-                value={formData.anxietyLevel}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+    if (config.type === 'select') {
+      return (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-purple-900 mb-4">{config.title}</h3>
+          <div className="grid grid-cols-1 gap-3">
+            {(options as any)[config.field].map((option: string) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => handleSelectOption(config.field, option)}
+                className={`p-4 rounded-xl text-left transition-all border-2 ${
+                  (formData as any)[config.field] === option
+                    ? 'border-purple-500 bg-purple-50 text-purple-900'
+                    : 'border-gray-100 bg-gray-50 text-gray-700 hover:border-purple-200 hover:bg-purple-50/30'
+                }`}
               >
-                <option value="">Select your anxiety level</option>
-                {anxietyLevelOptions.map((level) => (
-                  <option key={level} value={level}>{level}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                What coping strategies do you currently use?*
-              </label>
-              <select
-                name="currentCoping"
-                value={formData.currentCoping}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="">Select your strategies</option>
-                {copingStrategyOptions.map((strategy) => (
-                  <option key={strategy} value={strategy}>{strategy}</option>
-                ))}
-              </select>
-            </div>
+                {option}
+              </button>
+            ))}
           </div>
-        );
+        </div>
+      );
+    }
 
-      case 4:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                What features would be most helpful in Promptly?*
+    if (config.type === 'multi') {
+      return (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-purple-900 mb-4">{config.title}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {options.triggers.map((situation) => (
+              <label key={situation} className={`flex items-center space-x-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                formData.triggers.includes(situation)
+                  ? 'border-purple-500 bg-purple-50'
+                  : 'border-gray-100 bg-gray-50 hover:border-purple-200'
+              }`}>
+                <input
+                  type="checkbox"
+                  checked={formData.triggers.includes(situation)}
+                  onChange={() => handleCheckboxChange(situation)}
+                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-4 w-4"
+                />
+                <span className="text-sm text-gray-700 font-medium">{situation}</span>
               </label>
-              <textarea
-                name="desiredFeatures"
-                value={formData.desiredFeatures}
-                onChange={handleInputChange}
-                rows={3}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="e.g., specific scripts, panic button improvements, voice guidance..."
-              />
-              <p className="text-xs text-gray-500 mt-1">Suggestions: more scenario scripts, voice prompts, emergency exit phrases, practice mode</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Any other feedback or suggestions?
-              </label>
-              <textarea
-                name="generalFeedback"
-                value={formData.generalFeedback}
-                onChange={handleInputChange}
-                rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Your thoughts..."
-              />
-            </div>
+            ))}
           </div>
-        );
+        </div>
+      );
+    }
 
-      case 5:
-        return (
-          <div className="space-y-6">
+    if (config.type === 'final') {
+      return (
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold text-purple-900 mb-2">{config.title}</h3>
+          <p className="text-gray-600 text-sm mb-4">We'll notify you as soon as new scripts matching your profile are ready.</p>
+          
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Name (optional)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name (optional)</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                 placeholder="Your name"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email address*
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email address*</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="your.email@example.com"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
+                placeholder="you@example.com"
               />
-              <p className="text-xs text-gray-500 mt-1">We'll only use this to send you updates about Promptly</p>
             </div>
           </div>
-        );
-
-      default:
-        return null;
+        </div>
+      );
     }
+
+    return null;
   };
 
   return (
@@ -325,40 +317,50 @@ export default function SurveyPopup({ isOpen, onClose }: SurveyPopupProps) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-[2.5rem] p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-2">
-                  <MessageCircle className="h-6 w-6 text-purple-600" />
-                  <h2 className="text-xl font-semibold text-gray-900">Help Us Improve Promptly</h2>
+              {/* Header */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="bg-purple-100 p-2 rounded-xl">
+                    <MessageCircle className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">Personalize Your Safety Net</h2>
+                    <p className="text-sm text-gray-500">Step {currentStep} of 10</p>
+                  </div>
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
                 >
-                  <X className="h-5 w-5 text-gray-500" />
+                  <X className="h-6 w-6" />
                 </button>
               </div>
 
               {submitStatus === 'success' ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="h-8 w-8 text-green-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Thank You!</h3>
-                  <p className="text-gray-600">Your feedback helps us make Promptly better for people with social anxiety.</p>
+                <div className="text-center py-12">
+                  <motion.div 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+                  >
+                    <CheckCircle className="h-10 w-10 text-green-600" />
+                  </motion.div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h3>
+                  <p className="text-gray-600">Your profile has been created. We're customizing your scripts now.</p>
                 </div>
               ) : submitStatus === 'error' ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <X className="h-8 w-8 text-red-600" />
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <X className="h-10 w-10 text-red-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Oops!</h3>
-                  <p className="text-gray-600 mb-4">Something went wrong. Please try again.</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Oops!</h3>
+                  <p className="text-gray-600 mb-6">Something went wrong. Please try again.</p>
                   <button
                     onClick={() => setSubmitStatus('idle')}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-xl font-bold"
                   >
                     Try Again
                   </button>
@@ -366,42 +368,50 @@ export default function SurveyPopup({ isOpen, onClose }: SurveyPopupProps) {
               ) : (
                 <>
                   {/* Progress Bar */}
-                  <div className="mb-6">
-                    <div className="flex justify-between text-sm text-gray-500 mb-2">
-                      <span>Question {currentStep} of 5</span>
-                      <span>{Math.round((currentStep / 5) * 100)}% complete</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${(currentStep / 5) * 100}%` }}
+                  <div className="mb-10">
+                    <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(currentStep / 10) * 100}%` }}
+                        className="bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500 h-full"
                       />
                     </div>
                   </div>
 
-                  <form onSubmit={currentStep === 5 ? handleSubmit : (e) => { e.preventDefault(); nextStep(); }}>
-                    {renderStep()}
+                  <form onSubmit={currentStep === 10 ? handleSubmit : (e) => { e.preventDefault(); nextStep(); }}>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentStep}
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="min-h-[300px]"
+                      >
+                        {renderStep()}
+                      </motion.div>
+                    </AnimatePresence>
 
-                    <div className="flex justify-between mt-8">
+                    <div className="flex justify-between mt-10 pt-6 border-t border-gray-100">
                       <button
                         type="button"
                         onClick={prevStep}
                         disabled={currentStep === 1}
-                        className="flex items-center space-x-1 px-4 py-2 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-6 py-3 text-gray-500 font-bold hover:text-purple-600 disabled:opacity-0 transition-all"
                       >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span>Back</span>
+                        <ChevronLeft className="h-5 w-5" />
+                        Back
                       </button>
 
                       <button
                         type="submit"
-                        disabled={isSubmitting}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg font-medium disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                        disabled={isSubmitting || (currentStep === 2 && formData.triggers.length === 0)}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-3 rounded-xl font-bold shadow-lg shadow-purple-200 hover:shadow-purple-300 transform transition-all active:scale-95 disabled:grayscale disabled:opacity-50"
                       >
-                        {currentStep === 5 
-                          ? (isSubmitting ? 'Submitting...' : 'Submit Feedback') 
-                          : 'Next'}
-                        {currentStep < 5 && <ChevronRight className="h-4 w-4 ml-1" />}
+                        {currentStep === 10 
+                          ? (isSubmitting ? 'Personalizing...' : 'Complete Profile') 
+                          : (currentStep === 2 ? 'Next Question' : 'Continue')}
+                        {currentStep < 10 && <ChevronRight className="h-5 w-5 inline ml-2" />}
                       </button>
                     </div>
                   </form>
