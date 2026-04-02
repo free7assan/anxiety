@@ -11,6 +11,29 @@ export default function Home() {
   const [showSurvey, setShowSurvey] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
+  useEffect(() => {
+    // Track unique visits per session
+    const trackVisit = async () => {
+      let sessionId = sessionStorage.getItem('qb_visitor_session');
+      if (!sessionId) {
+        sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        sessionStorage.setItem('qb_visitor_session', sessionId);
+      }
+      
+      try {
+        await fetch('/api/track-visit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        });
+      } catch (err) {
+        console.error('Failed to track visit:', err);
+      }
+    };
+    
+    trackVisit();
+  }, []);
+
   const faqs = [
     {
       question: "Is my data private?",

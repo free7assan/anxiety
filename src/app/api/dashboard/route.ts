@@ -9,6 +9,13 @@ export async function GET(request: NextRequest) {
 
     // Fetch all survey responses sorted by date
     const responses = await collection.find({}).sort({ createdAt: -1 }).toArray();
+    
+    // Visitor stats
+    const visitorCollection = db.collection('site_visitors');
+    const totalVisitors = await visitorCollection.countDocuments({});
+    const uniqueSessionsToday = await visitorCollection.countDocuments({
+      date: new Date().toISOString().split('T')[0]
+    });
 
     // Aggregations for analysis
     const totalResponses = responses.length;
@@ -45,6 +52,8 @@ export async function GET(request: NextRequest) {
       success: true,
       stats: {
         totalResponses,
+        totalVisitors,
+        uniqueSessionsToday,
         frequencyStats,
         goalStats,
         settingStats,

@@ -42,6 +42,8 @@ interface SurveyResponse {
 
 interface Stats {
   totalResponses: number;
+  totalVisitors: number;
+  uniqueSessionsToday: number;
   frequencyStats: Record<string, number>;
   goalStats: Record<string, number>;
   settingStats: Record<string, number>;
@@ -172,7 +174,17 @@ export default function Dashboard() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Analytics Dashboard</h1>
-                <p className="text-sm text-gray-500">Managing survey responses and insights</p>
+                <div className="flex items-center gap-4 mt-0.5">
+                  <p className="text-sm text-gray-500 flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" />
+                    {stats?.totalVisitors || 0} Total Visitors
+                  </p>
+                  <div className="w-1 h-1 bg-gray-300 rounded-full" />
+                  <p className="text-sm text-purple-600 font-medium flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {stats?.uniqueSessionsToday || 0} Today
+                  </p>
+                </div>
               </div>
             </div>
             <button 
