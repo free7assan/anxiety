@@ -181,7 +181,7 @@ export default function Home() {
       </section>
 
       {/* The Struggle */}
-      <section className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+      <section id="struggle" className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12">
             Does it feel like your brain freezes the moment someone looks at you?
@@ -282,7 +282,7 @@ export default function Home() {
       </section>
 
       {/* The Transformation */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section id="transformation" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
             Imagine walking into any room with a 'Social Teleprompter' in your pocket.
@@ -383,7 +383,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Promptly: Your Real-Time Social Safety Net
+              QuietBridge: Your Real-Time Social Safety Net
             </h2>
             <p className="text-gray-600">
               The first tool that gives you words when your mind goes blank
@@ -451,9 +451,9 @@ export default function Home() {
               </div>
               <div className="ml-4">
                 <p className="text-gray-700 italic">
-                  "I know what it's like to feel like a 'social failure.' We built Promptly because 'Socially anxious people are the nicest'—you just need a tool to help the world see that."
+                  "I know what it's like to feel like a 'social failure.' We built QuietBridge because 'Socially anxious people are the nicest'—you just need a tool to help the world see that."
                 </p>
-                <p className="text-gray-600 text-sm mt-2">— Founder, Promptly</p>
+                <p className="text-gray-600 text-sm mt-2">— Founder, QuietBridge</p>
               </div>
             </div>
           </motion.div>
@@ -467,7 +467,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-gray-50/50 px-4 sm:px-6 lg:px-8">
+      <section id="faq" className="py-20 bg-gray-50/50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12 tracking-tight">
             Frequently Asked Questions
@@ -546,8 +546,8 @@ export default function Home() {
           
           <div className="mt-12 pt-8 border-t border-gray-800">
             <div className="flex items-center justify-center space-x-2">
-              <Brain className="h-6 w-6 text-blue-400" />
-              <span className="text-lg font-semibold">Promptly</span>
+              <Zap className="h-6 w-6 text-blue-400" />
+              <span className="text-lg font-semibold">QuietBridge</span>
             </div>
             <p className="text-gray-400 text-sm mt-2">
               Helping socially anxious people find their voice since 2024

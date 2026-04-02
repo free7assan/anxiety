@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const client = await clientPromise;
-    const db = client.db('promptly_surveys');
+    const db = client.db('quietbridge_surveys');
     const collection = db.collection('user_feedback');
 
     // Insert the survey data

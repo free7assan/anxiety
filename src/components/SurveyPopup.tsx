@@ -182,7 +182,7 @@ export default function SurveyPopup({ isOpen, onClose }: SurveyPopupProps) {
       },
       {
         id: 6,
-        title: "Where would you use Promptly most often?",
+        title: "Where would you use QuietBridge most often?",
         field: 'setting',
         type: 'select'
       },
@@ -324,10 +324,10 @@ export default function SurveyPopup({ isOpen, onClose }: SurveyPopupProps) {
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                   <div className="bg-purple-100 p-2 rounded-xl">
-                    <MessageCircle className="h-6 w-6 text-purple-600" />
+                    <Zap className="h-6 w-6 text-purple-600" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Personalize Your Safety Net</h2>
+                    <h2 className="text-xl font-bold text-gray-900">Personalize Your Bridge</h2>
                     <p className="text-sm text-gray-500">Step {currentStep} of 10</p>
                   </div>
                 </div>
