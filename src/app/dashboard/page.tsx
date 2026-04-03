@@ -44,6 +44,8 @@ interface Stats {
   totalResponses: number;
   totalVisitors: number;
   uniqueSessionsToday: number;
+  totalTriggers: number;
+  triggersToday: number;
   frequencyStats: Record<string, number>;
   goalStats: Record<string, number>;
   settingStats: Record<string, number>;
@@ -200,30 +202,36 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
           <StatCard 
-            title="Total Responses" 
-            value={stats?.totalResponses || 0} 
+            title="Total Visitors" 
+            value={stats?.totalVisitors || 0} 
             icon={Users} 
+            colorClass="bg-blue-100 text-blue-600" 
+          />
+          <StatCard 
+            title="Survey Triggers" 
+            value={stats?.totalTriggers || 0} 
+            icon={Zap} 
+            colorClass="bg-yellow-100 text-yellow-600" 
+          />
+          <StatCard 
+            title="Survey Answers" 
+            value={stats?.totalResponses || 0} 
+            icon={MessageSquare} 
             colorClass="bg-purple-100 text-purple-600" 
           />
           <StatCard 
             title="Top Goal" 
             value={stats ? Object.entries(stats.goalStats).sort((a,b) => b[1] - a[1])[0]?.[0] || 'N/A' : 'N/A'} 
             icon={Target} 
-            colorClass="bg-blue-100 text-blue-600" 
+            colorClass="bg-green-100 text-green-600" 
           />
           <StatCard 
             title="Avg. Frequency" 
             value={stats ? Object.entries(stats.frequencyStats).sort((a,b) => b[1] - a[1])[0]?.[0] || 'N/A' : 'N/A'} 
             icon={Clock} 
             colorClass="bg-pink-100 text-pink-600" 
-          />
-          <StatCard 
-            title="Top Trigger" 
-            value={stats ? Object.entries(stats.triggerStats).sort((a,b) => b[1] - a[1])[0]?.[0] || 'N/A' : 'N/A'} 
-            icon={Zap} 
-            colorClass="bg-yellow-100 text-yellow-600" 
           />
         </div>
 

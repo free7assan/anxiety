@@ -17,6 +17,13 @@ export async function GET(request: NextRequest) {
       date: new Date().toISOString().split('T')[0]
     });
 
+    // Trigger stats
+    const triggerCollection = db.collection('survey_triggers');
+    const totalTriggers = await triggerCollection.countDocuments({});
+    const triggersToday = await triggerCollection.countDocuments({
+      date: new Date().toISOString().split('T')[0]
+    });
+
     // Aggregations for analysis
     const totalResponses = responses.length;
     
@@ -54,6 +61,8 @@ export async function GET(request: NextRequest) {
         totalResponses,
         totalVisitors,
         uniqueSessionsToday,
+        totalTriggers,
+        triggersToday,
         frequencyStats,
         goalStats,
         settingStats,

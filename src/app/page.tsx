@@ -9,7 +9,33 @@ import Image from 'next/image';
 
 export default function Home() {
   const [showSurvey, setShowSurvey] = useState(false);
+  const [surveySource, setSurveySource] = useState('unknown');
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+  const handleShowSurvey = (source: string) => {
+    setSurveySource(source);
+    setShowSurvey(true);
+  };
+
+  useEffect(() => {
+    if (showSurvey) {
+      const trackTrigger = async () => {
+        const sessionId = sessionStorage.getItem('qb_visitor_session');
+        if (!sessionId) return;
+
+        try {
+          await fetch('/api/track-trigger', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, triggerSource: surveySource })
+          });
+        } catch (err) {
+          console.error('Failed to track survey trigger:', err);
+        }
+      };
+      trackTrigger();
+    }
+  }, [showSurvey, surveySource]);
 
   useEffect(() => {
     // Track unique visits per session
@@ -52,23 +78,14 @@ export default function Home() {
     }
   ];
 
-  useEffect(() => {
-    // Show survey after 5 seconds on every page load or refresh
-    const timer = setTimeout(() => {
-      setShowSurvey(true);
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
-      <Navigation onStartFree={() => setShowSurvey(true)} />
+      <Navigation onStartFree={() => handleShowSurvey('navigation')} />
       <SurveyPopup isOpen={showSurvey} onClose={() => setShowSurvey(false)} />
       
       {/* Floating Survey Button */}
       <button
-        onClick={() => setShowSurvey(true)}
+        onClick={() => handleShowSurvey('floating')}
         className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 transform hover:scale-110"
         aria-label="Provide feedback"
       >
@@ -107,7 +124,7 @@ export default function Home() {
               </div>
               
               <button 
-                onClick={() => setShowSurvey(true)}
+                onClick={() => handleShowSurvey('hero')}
                 className="bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500 hover:from-purple-700 hover:via-pink-700 hover:to-yellow-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg shadow-purple-200"
               >
                 Get My Safety Net — Start Free
