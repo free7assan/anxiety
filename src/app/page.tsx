@@ -6,8 +6,10 @@ import Navigation from '@/components/Navigation';
 import SurveyPopup from '@/components/SurveyPopup';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
   const [showSurvey, setShowSurvey] = useState(false);
   const [surveySource, setSurveySource] = useState('unknown');
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -124,10 +126,10 @@ export default function Home() {
               </div>
               
               <button 
-                onClick={() => handleShowSurvey('hero')}
+                onClick={() => router.push('/anxiety-test')}
                 className="bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500 hover:from-purple-700 hover:via-pink-700 hover:to-yellow-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg shadow-purple-200"
               >
-                Get My Safety Net — Start Free
+                Start Anxiety Test
               </button>
             </motion.div>
             
@@ -220,103 +222,130 @@ export default function Home() {
         </div>
       </section>
 
-      {/* The Struggle */}
-      <section id="struggle" className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12">
-            Does it feel like your brain freezes the moment someone looks at you?
-          </h2>
+      {/* The Struggle: Real Experiences */}
+      <section id="struggle" className="py-24 bg-[#FDFCFE] px-4 sm:px-6 lg:px-8 border-t border-purple-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">
+              The Invisible Consequences
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Social anxiety isn't just "shyness." It's a series of silent walls that keep your life smaller than it should be.
+            </p>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Column 1: Large Card */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
-            >
-              <div className="h-72 md:h-full relative overflow-hidden bg-gray-100">
-                <img 
-                  src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&q=80&w=1200" 
-                  alt="Anxiety and mental blanking" 
-                  className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm p-3 rounded-2xl shadow-sm">
-                  <Heart className="h-6 w-6 text-red-500" />
-                </div>
-                <div className="absolute bottom-6 left-6 right-6 text-left">
-                  <h3 className="font-bold text-2xl text-white mb-2">The Physiological Wall</h3>
-                  <p className="text-white/90 text-sm leading-relaxed max-w-md">
-                    Your heart rate spikes, your tongue feels like it expands, and suddenly, you can't muster a word out. You're not boring; you're just paralyzed.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-            
-            {/* Column 2: Two Stacked Cards */}
-            <div className="flex flex-col gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Terrified of Job Interviews",
+                image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=800",
+                thoughts: ["I can't do this!", "What if I mess up?"],
+                tags: ["Panic", "Self-Doubt"],
+                color: "bg-red-500"
+              },
+              {
+                title: "Invisible at Work",
+                image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
+                thoughts: ["I'm so alone...", "They never notice me.."],
+                tags: ["Ignored", "Left Out"],
+                color: "bg-purple-500"
+              },
+              {
+                title: "Watching Friendships Fade",
+                image: "https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?auto=format&fit=crop&q=80&w=800",
+                thoughts: ["They don't need me...", "I'm all alone."],
+                tags: ["Isolation", "Loneliness"],
+                color: "bg-pink-500"
+              },
+              {
+                title: "Brain Goes Blank",
+                image: "https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&q=80&w=800",
+                thoughts: ["I can't think...", "What if I say..."],
+                tags: ["Mind Maze", "Anxiety Fog"],
+                color: "bg-blue-500"
+              },
+              {
+                title: "Throwing Away Chances",
+                image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=800",
+                thoughts: ["Avoidance", "Regret"],
+                tags: ["Fear", "Missed"],
+                color: "bg-yellow-500"
+              },
+              {
+                title: "Socially Exhausted",
+                image: "https://images.unsplash.com/photo-1541178735423-d62a103497a3?auto=format&fit=crop&q=80&w=800",
+                thoughts: ["I'm so drained..", "I can't face it."],
+                tags: ["Burnout", "Exhaustion"],
+                color: "bg-gray-800"
+              }
+            ].map((item, index) => (
               <motion.div 
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row h-full md:h-1/2"
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group relative bg-white rounded-3xl overflow-hidden shadow-sm border border-purple-50 hover:shadow-xl transition-all duration-500"
               >
-                <div className="h-48 sm:h-auto sm:w-1/3 relative overflow-hidden bg-gray-100 shrink-0">
+                {/* Illustration Panel */}
+                <div className="h-64 relative overflow-hidden bg-gray-50">
                   <img 
-                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800" 
-                    alt="Team meeting" 
-                    className="absolute inset-0 w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                    src={item.image} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
                   />
-                  <div className="absolute inset-0 bg-black/10" />
-                </div>
-                <div className="p-6 text-left flex flex-col justify-center">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Briefcase className="h-5 w-5 text-blue-500" />
-                    <h3 className="font-bold text-gray-900">The Career Bottleneck</h3>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  
+                  {/* Thought Bubbles inspired by the image */}
+                  <div className="absolute inset-0 p-4 flex flex-col justify-between">
+                    <div className="flex flex-col gap-2 items-start">
+                      {item.thoughts.map((thought, i) => (
+                        <motion.div 
+                          key={i}
+                          initial={{ scale: 0, opacity: 0 }}
+                          whileInView={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.5 + (i * 0.2) }}
+                          className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-2xl rounded-tl-none shadow-sm border border-white/50"
+                        >
+                          <p className="text-[10px] font-bold text-gray-800 tracking-tight">{thought}</p>
+                        </motion.div>
+                      ))}
+                    </div>
+                    
+                    {/* Emotion Tags */}
+                    <div className="flex gap-2">
+                      {item.tags.map((tag, i) => (
+                        <div key={i} className={`${item.color} text-white text-[9px] font-black px-2 py-1 rounded-md transform -rotate-2 group-hover:rotate-0 transition-transform`}>
+                          {tag.toUpperCase()}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Work culture feels nearly impossible. You've lost jobs or missed opportunities because the 'unstructured social' parts of the day feel like a nightmare.
-                  </p>
+                </div>
+                
+                {/* Label */}
+                <div className="p-4 bg-white border-t border-purple-50">
+                  <h3 className="font-bold text-gray-900 text-sm text-center uppercase tracking-widest">{item.title}</h3>
                 </div>
               </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row h-full md:h-1/2"
-              >
-                <div className="h-48 sm:h-auto sm:w-1/3 relative overflow-hidden bg-gray-100 shrink-0">
-                  <img 
-                    src="https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?auto=format&fit=crop&q=80&w=800" 
-                    alt="Solitary figure" 
-                    className="absolute inset-0 w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/10" />
-                </div>
-                <div className="p-6 text-left flex flex-col justify-center">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Users className="h-5 w-5 text-green-500" />
-                    <h3 className="font-bold text-gray-900">The Isolation Cycle</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Years of isolation because talking to 'threatening strangers' feels like a high-stakes test you're destined to fail.
-                  </p>
-                </div>
-              </motion.div>
-            </div>
+            ))}
           </div>
           
           <motion.div 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-12 bg-blue-50 rounded-2xl p-6"
+            className="mt-16 bg-gradient-to-r from-purple-50 to-pink-50 rounded-[2.5rem] p-10 text-center border border-purple-100 shadow-inner"
           >
-            <p className="text-blue-800 font-medium">
-              Most people tell you to 'just be yourself' or 'practice in the mirror.' But when your nervous system is in a tailspin, you don't need advice—you need a script.
+            <p className="text-xl text-purple-900 font-medium leading-relaxed max-w-3xl mx-auto">
+              "I know what it's like to feel like a 'social failure.' We built QuietBridge because socially anxious people are actually the nicest—you just need a bridge to help the world see that."
             </p>
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-pink-600" />
+              <div className="text-left">
+                <p className="font-bold text-gray-900 text-sm">Founder</p>
+                <p className="text-xs text-gray-500">QuietBridge ⚡</p>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
