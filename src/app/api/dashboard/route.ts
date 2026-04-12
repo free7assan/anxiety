@@ -6,9 +6,11 @@ export async function GET(request: NextRequest) {
     const client = await clientPromise;
     const db = client.db('quietbridge_surveys');
     const collection = db.collection('user_feedback');
+    const testResultsCollection = db.collection('test_results');
 
     // Fetch all survey responses sorted by date
     const responses = await collection.find({}).sort({ createdAt: -1 }).toArray();
+    const testResults = await testResultsCollection.find({}).sort({ createdAt: -1 }).toArray();
     
     // Visitor stats
     const visitorCollection = db.collection('site_visitors');
@@ -23,6 +25,20 @@ export async function GET(request: NextRequest) {
     const triggersToday = await triggerCollection.countDocuments({
       date: new Date().toISOString().split('T')[0]
     });
+
+    // Test stats
+    const totalTestResults = testResults.length;
+    const testsToday = testResults.filter((t: any) => {
+      const createdAt = t?.createdAt ? new Date(t.createdAt) : null;
+      if (!createdAt || Number.isNaN(createdAt.getTime())) return false;
+      const today = new Date();
+      return createdAt.toDateString() === today.toDateString();
+    }).length;
+    const testTypeStats = testResults.reduce((acc: any, curr: any) => {
+      const type = curr?.testType || 'unknown';
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
 
     // Aggregations for analysis
     const totalResponses = responses.length;
@@ -63,12 +79,16 @@ export async function GET(request: NextRequest) {
         uniqueSessionsToday,
         totalTriggers,
         triggersToday,
+        totalTestResults,
+        testsToday,
+        testTypeStats,
         frequencyStats,
         goalStats,
         settingStats,
         triggerStats
       },
-      responses
+      responses,
+      testResults
     });
 
   } catch (error) {

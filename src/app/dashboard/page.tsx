@@ -40,12 +40,26 @@ interface SurveyResponse {
   createdAt: string;
 }
 
+interface TestResult {
+  _id: string;
+  testType: 'anxiety-test' | 'advanced-test' | string;
+  sessionId: string;
+  answers: any[];
+  result: any;
+  difficulty?: string;
+  pageUrl?: string;
+  createdAt: string;
+}
+
 interface Stats {
   totalResponses: number;
   totalVisitors: number;
   uniqueSessionsToday: number;
   totalTriggers: number;
   triggersToday: number;
+  totalTestResults: number;
+  testsToday: number;
+  testTypeStats: Record<string, number>;
   frequencyStats: Record<string, number>;
   goalStats: Record<string, number>;
   settingStats: Record<string, number>;
@@ -54,11 +68,14 @@ interface Stats {
 
 export default function Dashboard() {
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [testSearchTerm, setTestSearchTerm] = useState('');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [expandedTestRow, setExpandedTestRow] = useState<string | null>(null);
 
   const downloadCSV = () => {
     if (responses.length === 0) return;
@@ -120,6 +137,7 @@ export default function Dashboard() {
       const data = await res.json();
       if (data.success) {
         setResponses(data.responses);
+        setTestResults(data.testResults || []);
         setStats(data.stats);
       } else {
         throw new Error(data.error || 'Failed to fetch dashboard data');
@@ -140,6 +158,19 @@ export default function Dashboard() {
     r.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     r.goal?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const filteredTestResults = testResults.filter((t) => {
+    const term = testSearchTerm.toLowerCase();
+    if (!term) return true;
+    return (
+      t.testType?.toLowerCase().includes(term) ||
+      t.sessionId?.toLowerCase().includes(term) ||
+      t.createdAt?.toLowerCase().includes(term)
+    );
+  });
+
+  const basicTestResults = filteredTestResults.filter((t) => t.testType === 'anxiety-test');
+  const advancedTestResults = filteredTestResults.filter((t) => t.testType === 'advanced-test');
 
   const StatCard = ({ title, value, icon: Icon, colorClass }: { title: string, value: string | number, icon: any, colorClass: string }) => (
     <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-purple-100 flex items-center gap-4">
@@ -202,7 +233,7 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-10">
           <StatCard 
             title="Total Visitors" 
             value={stats?.totalVisitors || 0} 
@@ -220,6 +251,12 @@ export default function Dashboard() {
             value={stats?.totalResponses || 0} 
             icon={MessageSquare} 
             colorClass="bg-purple-100 text-purple-600" 
+          />
+          <StatCard 
+            title="Test Results" 
+            value={stats?.totalTestResults || 0} 
+            icon={BarChart3} 
+            colorClass="bg-indigo-100 text-indigo-700" 
           />
           <StatCard 
             title="Top Goal" 
@@ -357,6 +394,326 @@ export default function Dashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[2.5rem] shadow-sm border border-purple-100 overflow-hidden">
+              <div className="p-6 border-b border-purple-50 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Test Results</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Basic: {basicTestResults.length} • Advanced: {advancedTestResults.length}
+                  </p>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Search tests..."
+                    value={testSearchTerm}
+                    onChange={(e) => setTestSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 bg-purple-50 border-none rounded-xl focus:ring-2 focus:ring-purple-500 text-sm w-64"
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 space-y-8">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-black text-gray-900 tracking-wider uppercase">Basic Test Results</h3>
+                    <span className="text-xs font-bold text-gray-500">{basicTestResults.length}</span>
+                  </div>
+                  <div className="overflow-x-auto rounded-2xl border border-purple-100">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-purple-50/30 text-left">
+                          <th className="px-6 py-4 text-xs font-bold text-purple-900 uppercase tracking-wider">Type</th>
+                          <th className="px-6 py-4 text-xs font-bold text-purple-900 uppercase tracking-wider">Score</th>
+                          <th className="px-6 py-4 text-xs font-bold text-purple-900 uppercase tracking-wider">Date</th>
+                          <th className="px-6 py-4 text-xs font-bold text-purple-900 uppercase tracking-wider text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-purple-50">
+                        {basicTestResults.length > 0 ? basicTestResults.slice(0, 15).map((t) => (
+                          <Fragment key={t._id}>
+                            <tr
+                              className={`hover:bg-purple-50/20 transition-colors cursor-pointer ${expandedTestRow === t._id ? 'bg-purple-50/40' : ''}`}
+                              onClick={() => setExpandedTestRow(expandedTestRow === t._id ? null : t._id)}
+                            >
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-100 text-indigo-700">
+                                  {t.testType}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-700 font-bold">
+                                {t.result?.score !== undefined ? t.result.score : '—'} / 21
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-500">
+                                {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '—'}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button className="text-purple-600 hover:text-purple-900 transition-colors">
+                                  {expandedTestRow === t._id ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                                </button>
+                              </td>
+                            </tr>
+                            <AnimatePresence>
+                              {expandedTestRow === t._id && (
+                                <tr>
+                                  <td colSpan={4} className="px-6 py-6 bg-purple-50/20">
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: 'auto' }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                                    >
+                                      <div className="bg-white rounded-3xl border border-purple-100 overflow-hidden">
+                                        <div className="px-5 py-4 border-b border-purple-50">
+                                          <h4 className="text-xs font-black text-purple-900 uppercase tracking-widest">Result</h4>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                          <table className="w-full text-sm">
+                                            <tbody className="divide-y divide-purple-50">
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Test</td>
+                                                <td className="px-5 py-3 text-gray-600">{t.testType}</td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Date</td>
+                                                <td className="px-5 py-3 text-gray-600">
+                                                  {t.createdAt ? new Date(t.createdAt).toLocaleString() : '—'}
+                                                </td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Session</td>
+                                                <td className="px-5 py-3 text-gray-600 break-all">{t.sessionId}</td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Score</td>
+                                                <td className="px-5 py-3 text-gray-600">
+                                                  {t.result?.score !== undefined ? t.result.score : '—'} / 21
+                                                </td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Severity</td>
+                                                <td className="px-5 py-3 text-gray-600">{t.result?.severity || '—'}</td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Likelihood</td>
+                                                <td className="px-5 py-3 text-gray-600">{t.result?.likelihood || '—'}</td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+
+                                      <div className="bg-white rounded-3xl border border-purple-100 overflow-hidden">
+                                        <div className="px-5 py-4 border-b border-purple-50">
+                                          <h4 className="text-xs font-black text-purple-900 uppercase tracking-widest">Answers</h4>
+                                        </div>
+                                        <div className="p-5">
+                                          <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                              <thead>
+                                                <tr className="text-left">
+                                                  <th className="pb-3 text-xs font-black text-gray-500 uppercase tracking-widest">Q</th>
+                                                  <th className="pb-3 text-xs font-black text-gray-500 uppercase tracking-widest">Value</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody className="divide-y divide-purple-50">
+                                                {Array.isArray(t.answers) && t.answers.length > 0 ? (
+                                                  t.answers.map((a, i) => (
+                                                    <tr key={`${t._id}-a-${i}`}>
+                                                      <td className="py-3 font-bold text-gray-900">{i + 1}</td>
+                                                      <td className="py-3 text-gray-600">{a ?? '—'}</td>
+                                                    </tr>
+                                                  ))
+                                                ) : (
+                                                  <tr>
+                                                    <td className="py-3 text-gray-600" colSpan={2}>—</td>
+                                                  </tr>
+                                                )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  </td>
+                                </tr>
+                              )}
+                            </AnimatePresence>
+                          </Fragment>
+                        )) : (
+                          <tr>
+                            <td colSpan={4} className="px-6 py-10 text-center text-gray-500">
+                              No basic test results yet.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-black text-gray-900 tracking-wider uppercase">Advanced Test Results</h3>
+                    <span className="text-xs font-bold text-gray-500">{advancedTestResults.length}</span>
+                  </div>
+                  <div className="overflow-x-auto rounded-2xl border border-purple-100">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-purple-50/30 text-left">
+                          <th className="px-6 py-4 text-xs font-bold text-purple-900 uppercase tracking-wider">Type</th>
+                          <th className="px-6 py-4 text-xs font-bold text-purple-900 uppercase tracking-wider">Score</th>
+                          <th className="px-6 py-4 text-xs font-bold text-purple-900 uppercase tracking-wider">Date</th>
+                          <th className="px-6 py-4 text-xs font-bold text-purple-900 uppercase tracking-wider text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-purple-50">
+                        {advancedTestResults.length > 0 ? advancedTestResults.slice(0, 15).map((t) => (
+                          <Fragment key={t._id}>
+                            <tr
+                              className={`hover:bg-purple-50/20 transition-colors cursor-pointer ${expandedTestRow === t._id ? 'bg-purple-50/40' : ''}`}
+                              onClick={() => setExpandedTestRow(expandedTestRow === t._id ? null : t._id)}
+                            >
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-100 text-indigo-700">
+                                  {t.testType}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-700 font-bold">
+                                {t.result?.score !== undefined ? t.result.score : '—'}
+                                {t.result?.maxScore !== undefined ? ` / ${t.result.maxScore}` : ''}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-500">
+                                {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '—'}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button className="text-purple-600 hover:text-purple-900 transition-colors">
+                                  {expandedTestRow === t._id ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                                </button>
+                              </td>
+                            </tr>
+                            <AnimatePresence>
+                              {expandedTestRow === t._id && (
+                                <tr>
+                                  <td colSpan={4} className="px-6 py-6 bg-purple-50/20">
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: 'auto' }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                                    >
+                                      <div className="bg-white rounded-3xl border border-purple-100 overflow-hidden">
+                                        <div className="px-5 py-4 border-b border-purple-50">
+                                          <h4 className="text-xs font-black text-purple-900 uppercase tracking-widest">Result</h4>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                          <table className="w-full text-sm">
+                                            <tbody className="divide-y divide-purple-50">
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Test</td>
+                                                <td className="px-5 py-3 text-gray-600">{t.testType}</td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Date</td>
+                                                <td className="px-5 py-3 text-gray-600">
+                                                  {t.createdAt ? new Date(t.createdAt).toLocaleString() : '—'}
+                                                </td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Session</td>
+                                                <td className="px-5 py-3 text-gray-600 break-all">{t.sessionId}</td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Score</td>
+                                                <td className="px-5 py-3 text-gray-600">
+                                                  {t.result?.score !== undefined ? t.result.score : '—'}
+                                                  {t.result?.maxScore !== undefined ? ` / ${t.result.maxScore}` : ''}
+                                                </td>
+                                              </tr>
+                                              <tr>
+                                                <td className="px-5 py-3 font-bold text-gray-900">Overall Level</td>
+                                                <td className="px-5 py-3 text-gray-600">{t.result?.level || '—'}</td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+
+                                      <div className="bg-white rounded-3xl border border-purple-100 overflow-hidden">
+                                        <div className="px-5 py-4 border-b border-purple-50">
+                                          <h4 className="text-xs font-black text-purple-900 uppercase tracking-widest">Breakdown</h4>
+                                        </div>
+                                        <div className="p-5 space-y-6">
+                                          {t.result?.domainScores && (
+                                            <div className="overflow-x-auto">
+                                              <table className="w-full text-sm">
+                                                <thead>
+                                                  <tr className="text-left">
+                                                    <th className="pb-3 text-xs font-black text-gray-500 uppercase tracking-widest">Domain</th>
+                                                    <th className="pb-3 text-xs font-black text-gray-500 uppercase tracking-widest">Score</th>
+                                                    <th className="pb-3 text-xs font-black text-gray-500 uppercase tracking-widest">Max</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-purple-50">
+                                                  {Object.entries(t.result.domainScores).map(([domain, v]: any) => (
+                                                    <tr key={domain}>
+                                                      <td className="py-3 font-bold text-gray-900">{domain}</td>
+                                                      <td className="py-3 text-gray-600">{v?.score ?? '—'}</td>
+                                                      <td className="py-3 text-gray-600">{v?.max ?? '—'}</td>
+                                                    </tr>
+                                                  ))}
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          )}
+
+                                          <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                              <thead>
+                                                <tr className="text-left">
+                                                  <th className="pb-3 text-xs font-black text-gray-500 uppercase tracking-widest">Q</th>
+                                                  <th className="pb-3 text-xs font-black text-gray-500 uppercase tracking-widest">Value</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody className="divide-y divide-purple-50">
+                                                {Array.isArray(t.answers) && t.answers.length > 0 ? (
+                                                  t.answers.map((a, i) => (
+                                                    <tr key={`${t._id}-a-${i}`}>
+                                                      <td className="py-3 font-bold text-gray-900">{i + 1}</td>
+                                                      <td className="py-3 text-gray-600">{a ?? '—'}</td>
+                                                    </tr>
+                                                  ))
+                                                ) : (
+                                                  <tr>
+                                                    <td className="py-3 text-gray-600" colSpan={2}>—</td>
+                                                  </tr>
+                                                )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  </td>
+                                </tr>
+                              )}
+                            </AnimatePresence>
+                          </Fragment>
+                        )) : (
+                          <tr>
+                            <td colSpan={4} className="px-6 py-10 text-center text-gray-500">
+                              No advanced test results yet.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
