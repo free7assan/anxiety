@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, X, Zap } from 'lucide-react';
 import Link from 'next/link';
 
@@ -10,8 +10,13 @@ interface NavigationProps {
 
 export default function Navigation({ onStartFree }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const closeMenu = () => setIsOpen(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-purple-100 shadow-sm">
@@ -23,10 +28,15 @@ export default function Navigation({ onStartFree }: NavigationProps) {
           </Link>
           
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/#struggle" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">The Struggle</Link>
-            <Link href="/#transformation" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">The Solution</Link>
-            <Link href="/anxiety-test" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">Anxiety Test</Link>
-            <Link href="/#faq" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">FAQ</Link>
+            {mounted && (
+              <>
+                <Link href="/#struggle" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">The Struggle</Link>
+                <Link href="/#transformation" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">The Solution</Link>
+                <Link href="/anxiety-test" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">Anxiety Test</Link>
+                <Link href="/blog" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">Blog</Link>
+                <Link href="/#faq" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">FAQ</Link>
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -54,20 +64,25 @@ export default function Navigation({ onStartFree }: NavigationProps) {
         {isOpen && (
           <div id="qb-mobile-menu" className="md:hidden pb-4">
             <div className="mt-2 rounded-2xl border border-purple-100 bg-white shadow-sm overflow-hidden">
-              <div className="flex flex-col">
-                <Link onClick={closeMenu} href="/#struggle" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
-                  The Struggle
-                </Link>
-                <Link onClick={closeMenu} href="/#transformation" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
-                  The Solution
-                </Link>
-                <Link onClick={closeMenu} href="/anxiety-test" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
-                  Anxiety Test
-                </Link>
-                <Link onClick={closeMenu} href="/#faq" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
-                  FAQ
-                </Link>
-              </div>
+              {mounted && (
+                <div className="flex flex-col">
+                  <Link onClick={closeMenu} href="/#struggle" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
+                    The Struggle
+                  </Link>
+                  <Link onClick={closeMenu} href="/#transformation" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
+                    The Solution
+                  </Link>
+                  <Link onClick={closeMenu} href="/anxiety-test" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
+                    Anxiety Test
+                  </Link>
+                  <Link onClick={closeMenu} href="/blog" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
+                    Blog
+                  </Link>
+                  <Link onClick={closeMenu} href="/#faq" className="px-5 py-4 text-gray-800 font-bold hover:bg-purple-50 transition-colors">
+                    FAQ
+                  </Link>
+                </div>
+              )}
 
               <div className="p-4 border-t border-purple-100 bg-gradient-to-r from-purple-50 to-pink-50">
                 <button
